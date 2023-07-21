@@ -5,7 +5,7 @@ class BaseModel(models.Model):  # TODO: Fix fields with datetime.
     """ Common properties among our models """
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    status = models.SmallIntegerField(max_length=1)
+    status = models.SmallIntegerField()
     external_id = models.CharField(max_length=60, unique=True)
 
     class Meta:
