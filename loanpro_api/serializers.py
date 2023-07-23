@@ -51,6 +51,21 @@ class CustomerBalanceSerializer(serializers.ModelSerializer):
         return data
 
 
+class CustomerLoansSerializer(serializers.ModelSerializer):
+    """Serializer for customer objects"""
+
+    class Meta:
+        model = Loan
+        fields = (
+            "external_id",
+            "customer_id",
+            "amount",
+            "outstanding",
+            "status",
+        )
+        read_only_fields = ("created_at",)
+
+
 class LoanSerializer(serializers.ModelSerializer):
     """Serializer to read loan objects"""
 
@@ -69,6 +84,13 @@ class LoanSerializer(serializers.ModelSerializer):
             "status",
             "outstanding",
         )
+
+    def to_representation(self, instance):
+        """Override function."""
+        data = super().to_representation(instance)
+        customer = Customer.objects.get(id=instance.customer_id.id)
+        data["customer_id"] = customer.external_id
+        return data
 
     def validate(self, attrs):
         """

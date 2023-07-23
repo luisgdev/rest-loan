@@ -6,10 +6,12 @@ from rest_framework.authentication import (
     SessionAuthentication,
     TokenAuthentication,
 )
+from rest_framework.response import Response
 
 from loanpro_api.models import Customer, Loan, Payment
 from loanpro_api.serializers import (
     CustomerBalanceSerializer,
+    CustomerLoansSerializer,
     CustomerSerializer,
     LoanCreateSerializer,
     LoanSerializer,
@@ -62,6 +64,39 @@ class CustomerBalanceRead(mixins.RetrieveModelMixin, generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         """Customer balance info"""
         return self.retrieve(request, *args, **kwargs)
+
+
+class CustomerLoansRead(mixins.ListModelMixin, generics.GenericAPIView):
+    """Return customer loans."""
+
+    lookup_field = "external_id"
+    queryset = Loan.objects.all()
+    authentication_classes = (
+        TokenAuthentication,
+        BasicAuthentication,
+        SessionAuthentication,
+    )
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = CustomerLoansSerializer
+
+    def list(self, request, *args, **kwargs):
+        """ Override function """
+        self.queryset = self.queryset.filter(
+            customer_id=Customer.objects.get(
+                external_id=self.kwargs.get("external_id")
+            ).id
+        )
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def get(self, request, *args, **kwargs):
+        """Customer balance info"""
+        return self.list(request, *args, **kwargs)
 
 
 class CustomerDetail(

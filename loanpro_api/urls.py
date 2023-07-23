@@ -9,6 +9,7 @@ urlpatterns = [
     path("customer/", views.CustomerCreateRead.as_view()),
     path("customer/<str:external_id>/", views.CustomerDetail.as_view()),
     path("customer/<str:external_id>/balance", views.CustomerBalanceRead.as_view()),
+    path("customer/<str:external_id>/loans", views.CustomerLoansRead.as_view()),
     path("loan/", views.LoanCreateRead.as_view()),
     path("loan/<str:external_id>/", views.LoanDetail.as_view()),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
