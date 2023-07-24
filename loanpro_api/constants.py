@@ -3,10 +3,8 @@
 from enum import Enum
 
 
-class CustomerStatus(int, Enum):
-    """
-    Valid status for customers.
-    """
+class StatusForCustomer(int, Enum):
+    """ Valid status for customers. """
 
     ACTIVE = 1
     INACTIVE = 2
@@ -16,10 +14,8 @@ class CustomerStatus(int, Enum):
         return value in cls._value2member_map_
 
 
-class LoanStatus(int, Enum):
-    """
-    Valid status for Loans.
-    """
+class StatusForLoan(int, Enum):
+    """ Valid status for Loans. """
 
     PENDING = 1
     ACTIVE = 2
@@ -31,10 +27,8 @@ class LoanStatus(int, Enum):
         return value in cls._value2member_map_
 
 
-class PaymentStatus(int, Enum):
-    """
-    Valid status for payments.
-    """
+class StatusForPayment(int, Enum):
+    """ Valid status for payments. """
 
     COMPLETED = 1
     REJECTED = 2

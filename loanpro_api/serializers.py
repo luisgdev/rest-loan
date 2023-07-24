@@ -2,16 +2,17 @@
 
 from rest_framework import serializers
 
-from loanpro_api.constants import LoanStatus
+from loanpro_api.constants import StatusForLoan
 from loanpro_api.models import Customer, Loan, Payment, PaymentDetail
 
 
 class CustomerSerializer(serializers.ModelSerializer):
-    """Serializer for customer objects"""
+    """ Serializer for customer objects. """
 
     class Meta:
         model = Customer
         fields = (
+            "id",
             "external_id",
             "status",
             "score",
@@ -20,19 +21,21 @@ class CustomerSerializer(serializers.ModelSerializer):
         read_only_fields = (
             "created_at",
             "status",
+            "id",
         )
 
     def validate(self, attrs):
         """
         Custom attrs validation.
+        # TODO: Define valor minimo para `score`.
         """
-        if attrs.get("score") < 0:  # TODO: Definir valor minimo para `score`.
+        if attrs.get("score") < 0:
             raise serializers.ValidationError("Score cannot be a negative number.")
         return attrs
 
 
 class CustomerBalanceSerializer(serializers.ModelSerializer):
-    """Serializer for customer objects"""
+    """ Serializer for customer balance. """
 
     class Meta:
         model = Customer
@@ -43,7 +46,7 @@ class CustomerBalanceSerializer(serializers.ModelSerializer):
         read_only_fields = ("created_at",)
 
     def to_representation(self, instance):
-        """Override function."""
+        """ Override function. """
         data = super().to_representation(instance)
         total_debt = _get_customer_total_debt(customer_id=instance.id)
         data["available_amount"] = f"{float(instance.score) - total_debt:.2f}"
@@ -52,7 +55,7 @@ class CustomerBalanceSerializer(serializers.ModelSerializer):
 
 
 class CustomerLoansSerializer(serializers.ModelSerializer):
-    """Serializer for customer objects"""
+    """ Serializer for customer loans. """
 
     class Meta:
         model = Loan
@@ -67,7 +70,8 @@ class CustomerLoansSerializer(serializers.ModelSerializer):
 
 
 class LoanSerializer(serializers.ModelSerializer):
-    """Serializer to read loan objects"""
+    """ Serializer to read loan objects. """
+    # TODO: El campo `customer_id` debe ser el `customer.external_id` (str).
 
     class Meta:
         model = Loan
@@ -86,16 +90,14 @@ class LoanSerializer(serializers.ModelSerializer):
         )
 
     def to_representation(self, instance):
-        """Override function."""
+        """ Override function. """
         data = super().to_representation(instance)
         customer = Customer.objects.get(id=instance.customer_id.id)
         data["customer_id"] = customer.external_id
         return data
 
     def validate(self, attrs):
-        """
-        Custom validation to create a Loan.
-        """
+        """ Custom validation to create a Loan. """
         if attrs.get("amount") <= 0:
             raise serializers.ValidationError("Invalid amount value.")
         attrs["outstanding"] = attrs.get("amount")
@@ -111,23 +113,8 @@ class LoanSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class LoanCreateSerializer(serializers.ModelSerializer):
-    """Serializer to create loan objects"""
-
-    class Meta:
-        model = Loan
-        fields = (
-            "external_id",
-            "customer_id",
-            "amount",
-            "status",
-            "maximum_payment_date",
-        )
-        read_only_fields = ("created_at",)
-
-
 class PaymentSerializer(serializers.ModelSerializer):
-    """Serializer for payment"""
+    """ Serializer for payment. """
 
     class Meta:
         model = Payment
@@ -136,7 +123,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
 class PaymentDetailSerializer(serializers.ModelSerializer):
-    """Serializer for payment detail"""
+    """ Serializer for payment detail. """
 
     class Meta:
         model = PaymentDetail
@@ -145,13 +132,11 @@ class PaymentDetailSerializer(serializers.ModelSerializer):
 
 
 def _get_customer_total_debt(customer_id: int) -> float:
-    """
-    Calculate the total debt for a given user.
-    """
+    """ Calculate the total debt for a given user. """
     return float(
         sum(
             loan.outstanding
             for loan in Loan.objects.filter(customer_id=customer_id)
-            if loan.status in (LoanStatus.PENDING, LoanStatus.ACTIVE)
+            if loan.status in (StatusForLoan.PENDING, StatusForLoan.ACTIVE)
         )
     )

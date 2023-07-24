@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name="status",
             field=models.SmallIntegerField(
                 choices=[(1, "ACTIVE"), (2, "INACTIVE")],
-                default=loanpro_api.constants.CustomerStatus["ACTIVE"],
+                default=loanpro_api.constants.StatusForCustomer["ACTIVE"],
             ),
         ),
         migrations.AlterField(
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
             name="status",
             field=models.SmallIntegerField(
                 choices=[(1, "PENDING"), (2, "ACTIVE"), (3, "REJECTED"), (4, "PAID")],
-                default=loanpro_api.constants.LoanStatus["PENDING"],
+                default=loanpro_api.constants.StatusForLoan["PENDING"],
             ),
         ),
         migrations.AlterField(
