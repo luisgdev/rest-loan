@@ -1,6 +1,7 @@
 Django==4.2.3
 djangorestframework==3.14.0
 drf-spectacular==0.26.3
-psycopg2==2.9.6
+gunicorn==21.2.0
+psycopg2-binary==2.9.6
 pytest==7.4.0
 pytest-django==4.5.2
